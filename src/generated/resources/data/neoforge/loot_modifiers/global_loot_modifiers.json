@@ -1,0 +1,27 @@
+{
+  "entries": [
+    "summoner:entities/bee",
+    "summoner:entities/magma_cube",
+    "summoner:entities/phantom",
+    "summoner:entities/ghast",
+    "summoner:entities/allay",
+    "summoner:entities/ender_dragon",
+    "summoner:entities/creeper",
+    "summoner:entities/warden",
+    "summoner:entities/drowned",
+    "summoner:entities/elder_guardian",
+    "summoner:entities/stray",
+    "summoner:entities/bat",
+    "summoner:entities/evoker",
+    "summoner:chests/shipwreck_treasure",
+    "summoner:chests/jungle_temple",
+    "summoner:chests/end_city_treasure",
+    "summoner:chests/abandoned_mineshaft",
+    "summoner:chests/pillager_outpost",
+    "summoner:chests/village/village_weaponsmith",
+    "summoner:chests/ancient_city",
+    "summoner:chests/bastion_treasure",
+    "summoner:chests/desert_pyramid"
+  ],
+  "replace": false
+}

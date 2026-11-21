@@ -1,0 +1,85 @@
+package first.summoner.common.projectile;
+
+
+import first.lyra.common.attachmentEntity.IBlockCollision;
+import first.lyra.common.attachmentEntity.IEntityCollision;
+import first.lyra.common.particle.genericParticle.GenericParticleBuilder;
+import first.lyra.common.projectile.Projectile;
+import first.lyra.utils.ParticleHelper;
+import first.summoner.register.SummonerAttachmentEntityRegister;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
+/**
+ * 小鬼火球射弹 - 穿透4个敌怪，100%施加着火了！效果。
+ * 使用 GLOBAL 无敌帧模式（穿透攻击互相干扰）。
+ */
+public class ImpFireball extends Projectile implements IEntityCollision<ImpFireball>, IBlockCollision<ImpFireball> {
+
+    private int hitCount = 0;
+
+    public ImpFireball() {
+        super(SummonerAttachmentEntityRegister.IMP_FIREBALL);
+        setDrag(1.0f);
+        setGravity(0);
+        setMaxTickCount(50);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        Level level = getLevel();
+
+        ParticleHelper.create(level)
+                .generic(GenericParticleBuilder.create()
+                                 .centerColor(0xe1c316)
+                                 .edgeColor(0xff7506)
+                                 .lifetime(4)
+                                 .lifetimeRandom(8)
+                                 .spin(0.25f)
+                                 .spinRandom(0.25F)
+                                 .scale(0.015f)
+                                 .scaleRandom(0.015f)
+                )
+                .pos(getPos())
+                .count(8)
+                .offset(0.2)
+                .emit();
+    }
+
+    @Override
+    public void onCollisionAttack(List<HitContext> hitContexts) {
+        DamageSource source = getDamageSource();
+        for (HitContext hit : hitContexts) {
+            if (hitCount >= 4) {
+                setCurrentPathNode(getCurrentPathNode().modifyPos(hit.hitPoint()));
+                setRemove();
+                return;
+            }
+            LivingEntity living = hit.entity();
+            attack(living, getDamage(), 2);
+            living.igniteForTicks(60);
+            hitCount++;
+        }
+    }
+
+    @Override
+    public @NotNull AABB getHitbox() {
+        return new AABB(-0.15, -0.15, -0.15, 0.15, 0.15, 0.15);
+    }
+
+    @Override
+    public @NotNull AABB getBlockCollisionBox() {
+        return getHitbox();
+    }
+
+    @Override
+    public void onBlockCollision(CollisionContext context) {
+        setRemove();
+    }
+}

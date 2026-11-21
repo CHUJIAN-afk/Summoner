@@ -1,0 +1,74 @@
+package first.summoner.network;
+
+import first.lyra.common.attachment.SummonMarkTracker;
+import first.lyra.common.summonMark.SummonMarkType;
+import first.lyra.register.LyraAttachmentRegister;
+import first.summoner.Summoner;
+import first.summoner.common.attachment.GildedWandData;
+import first.summoner.common.item.GildedWandItem;
+import first.summoner.register.SummonerAttachmentRegister;
+import first.summoner.register.SummonerEnchantmentSummonMarkTypeRegister;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
+
+public record GildedWandPacket(int id, InteractionHand hand) implements CustomPacketPayload {
+
+    public static final Type<GildedWandPacket> TYPE = new Type<>(Summoner.rl("gilded_wand"));
+
+    /** 标记刷新间隔：玩家 tick 值整除该值时才落一次标记。 */
+    private static final int MARK_INTERVAL = 20;
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, GildedWandPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT,
+            GildedWandPacket::id,
+            StreamCodec.of(
+                    FriendlyByteBuf::writeEnum,
+                    buf -> buf.readEnum(InteractionHand.class)
+            ),
+            GildedWandPacket::hand,
+            GildedWandPacket::new
+    );
+
+    public static void handleServer(GildedWandPacket payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            Player player = context.player();
+            Level level = player.level();
+            Entity entity = level.getEntity(payload.id());
+            ItemStack itemStack = player.getItemInHand(payload.hand());
+            if (itemStack.getItem() instanceof GildedWandItem && entity instanceof LivingEntity living) {
+                if (!player.isCreative()) {
+                    itemStack.hurtAndBreak(1, player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+                }
+                player.getData(LyraAttachmentRegister.TargetCache).record(living, 200);
+                GildedWandData data = player.getData(SummonerAttachmentRegister.GildedWandData);
+                if (++data.power > 20) {
+                    Set<SummonMarkType> markTypes = SummonerEnchantmentSummonMarkTypeRegister.resolveActiveMarkType(itemStack);
+                    if (!markTypes.isEmpty()) {
+                        SummonMarkType markType = markTypes.iterator().next();
+                        SummonMarkTracker tracker = player.getData(LyraAttachmentRegister.SummonMarkData);
+                        tracker.tracker(living, markType.createInstance(player, living));
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "vertex": "summoner:moon_laser",
+  "fragment": "summoner:moon_laser",
+  "attributes": ["Position"],
+  "samplers": [{ "name": "SceneDepth" }],
+  "uniforms": [
+    { "name": "BeamProjection", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] },
+    { "name": "BeamToView", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] },
+    { "name": "ClipToBeam", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] },
+    { "name": "EffectSize", "type": "float", "count": 2, "values": [1, 1] },
+    { "name": "BeamLength", "type": "float", "count": 1, "values": [32] },
+    { "name": "BeamRadius", "type": "float", "count": 1, "values": [0.3] },
+    { "name": "BeamTaperSpeed", "type": "float", "count": 2, "values": [1, 1] },
+    { "name": "Time", "type": "float", "count": 1, "values": [0] },
+    { "name": "Opacity", "type": "float", "count": 1, "values": [1] }
+  ]
+}

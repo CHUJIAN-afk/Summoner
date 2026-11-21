@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.02,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "name": "summoner:optic_staff"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "summoner:with/entities/ghast"
+}
